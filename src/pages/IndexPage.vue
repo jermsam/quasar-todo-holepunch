@@ -40,7 +40,7 @@
 
 <script setup>
   import {onMounted, ref} from 'vue';
-  import {socket, swarm} from '../api';
+  import {swarm, socket} from '../api';
 
 const todos = ref([])
 const prompt = ref(false)

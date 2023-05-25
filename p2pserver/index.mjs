@@ -1,30 +1,26 @@
-import { WebSocketServer } from 'ws'
+import WebSocket from 'ws';
+import express from 'express';
+import http from 'http';
 
+// @ts-ignore
 import DHT from 'hyperdht'
+// @ts-ignore
 import { relay } from '@hyperswarm/dht-relay'
+// @ts-ignore
 import Stream from '@hyperswarm/dht-relay/ws'
 
-const port = 8080;
-const dht = new DHT()
-const server = new WebSocketServer({ port })
+const port = process.env.PORT || 3000;
 
-let todoList =[];
-server.on('connection', (socket) => {
-  relay(dht, new Stream(false, socket))
-  
-  socket.on("addTodo", (todo) => {
-    console.log('received: %s', todo);
-    //👇🏻 Adds the to-do object to the list of to-dos
-    todoList.unshift(todo);
-    //👇🏻 Sends all the to-dos to the Qwik app
-    socket.send(todoList);
-  });
-  socket.on("disconnect", () => {
-    socket.disconnect();
-    console.log("🔥: A user disconnected");
-  });
+const server = http.createServer(express)
+
+const dht = new DHT()
+
+const wss = new WebSocket.Server({server})
+
+wss.on('connection', function (ws) {
+  relay(dht, new Stream(false, ws))
 })
 
-
-
-
+server.listen(port, function (){
+  console.log(`Listening at: ws://localhost:${port}`);
+})
